@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DATA_DIR="PATH/TO/IMAGEFOLDER"
+DATA_DIR="PATH/TO/IMAGENET/val"
 
 # run baseline attack
 python test.py \

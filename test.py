@@ -5,13 +5,14 @@ import logging
 import os
 
 import torch
-from torchvision import transforms, datasets, models, utils as vutils
 from timm.models import create_model
 from torch.utils.data import DataLoader
+from torchvision import transforms, models, utils as vutils
 from tqdm import tqdm
 
 import vit_models
 from attack import normalize, local_adv
+from dataset import AdvImageNet
 
 targeted_class_dict = {
     24: "Great Grey Owl",
@@ -91,7 +92,7 @@ def get_data_loader(args, verbose=True):
     ])
 
     test_dir = args.test_dir
-    test_set = datasets.ImageFolder(test_dir, data_transform)
+    test_set = AdvImageNet(root=test_dir, transform=data_transform)
     test_size = len(test_set)
     if verbose:
         print('Test data size:', test_size)

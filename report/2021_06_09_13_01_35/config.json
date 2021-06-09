@@ -1,0 +1,15 @@
+{
+    "test_dir": "/home/kanchanaranasinghe/public_repo/Intriguing-Properties-of-Vision-Transformers/data",
+    "src_model": "deit_tiny_patch16_224",
+    "tar_model": "tnt_s_patch16_224",
+    "scale_size": 256,
+    "img_size": 224,
+    "batch_size": 128,
+    "eps": 16,
+    "index": "last",
+    "attack_type": "mim",
+    "tar_ensemble": false,
+    "apply_ti": false,
+    "save_im": false,
+    "exp": "2021_06_09_13_01_35"
+}

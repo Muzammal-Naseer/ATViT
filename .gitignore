@@ -1,5 +1,7 @@
 # Project related
 /report
+/checkpoints
+/wandb
 
 # Pycharm
 .idea

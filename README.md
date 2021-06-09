@@ -35,11 +35,11 @@ To directly run demo transfer attacks using baseline, ensemble, and ensemble wit
 ```
 
 ## Dataset
-We use a subset of the ImageNet validation set (5000 images) containing 5 random samples from each class that are correctly classified by both ResNet50 and ViT-small. This dataset is used for all experiments.
+We use a subset of the ImageNet validation set (5000 images) containing 5 random samples from each class that are correctly classified by both ResNet50 and ViT-small. This dataset is used for all experiments. This list of images is present in `data/image_list.json`. In following code, setting the path to the original ImageNet 2012 val set is sufficient; only the subset of images will be used for the evaluation. 
 
 ## Self-Ensemble Strategy
 <sup>([top](#contents))</sup>
-Run transfer attack using our ensemble strategy as follows. `DATA_DIR` points to the root directory containing the subset of ImageNet. We support attack types FGSM, PGD, MI-FGSM, DIM, and TI by default. Note that any other attack can be applied on ViT models using the self-ensemble strategy. 
+Run transfer attack using our ensemble strategy as follows. `DATA_DIR` points to the root directory containing the validation images of ImageNet (original imagenet). We support attack types FGSM, PGD, MI-FGSM, DIM, and TI by default. Note that any other attack can be applied on ViT models using the self-ensemble strategy. 
 
 ```bash
 python test.py \

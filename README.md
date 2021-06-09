@@ -19,8 +19,9 @@
 1) [Quickstart](#quickstart)
 2) [Self-Ensemble](#self-ensemble-strategy)
 3) [Token Refinement Module](#token-refinement-module)
-4) [References](#references)
-5) [Citation](#citation)
+4) [Training TRM](#training-trm)
+5) [References](#references)
+6) [Citation](#citation)
 
 ## Requirements
 ```bash
@@ -70,14 +71,29 @@ python test.py \
 
 
 ## Training TRM
-To be added soon
+<sup>([top](#contents))</sup>
+For training the TRM module, use the following:
+```bash
+./scripts/train_trm.sh
+```
+Set the variables for experiment name (`EXP_NAME`) used for logging checkpoints and update `DATA_PATH` to point to the ImageNet 2012 root directory (containing `/train` and `/val` folders). We train using a single GPU. We initialize the weights using a pre-trained model and update only the TRM weights. 
 
-
-## To Be Added
-1) ~~Code for self-ensemble model strategy~~
-2) Code for ~~token refinement module~~ and training methodology 
-3) ~~Pretrained models and code for evaluating transfer attacks~~
-
+For using other models, replace the model name and the pretrained model path as below: 
+```bash
+python -m torch.distributed.launch \
+  --nproc_per_node=1 \
+  --master_port="$RANDOM" \
+  --use_env train_trm.py \
+  --exp "$EXP_NAME" \
+  --model "small_patch16_224_hierarchical" \
+  --lr 0.01 \
+  --batch-size 256 \
+  --start-epoch 0 \
+  --epochs 12 \
+  --data "$DATA_PATH" \
+  --pretrained "https://dl.fbaipublicfiles.com/deit/deit_small_patch16_224-cd65a155.pth" \
+  --output_dir "checkpoints/$EXP_NAME"
+```  
 
 ## References
 <sup>([top](#contents))</sup>

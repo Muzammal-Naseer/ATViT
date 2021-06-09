@@ -5,7 +5,6 @@ export WANDB_PROJECT="PROJECT"
 export WANDB_MODE='dryrun'
 
 DATA_PATH="PATH/TO/IMAGENET"
-DATA_PATH="$HOME/data/raw/imagenet"
 
 EXP_NAME="test"
 

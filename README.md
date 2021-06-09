@@ -100,6 +100,7 @@ python -m torch.distributed.launch \
 Code borrowed from [DeiT](https://github.com/facebookresearch/deit) repository and [TIMM](https://github.com/rwightman/pytorch-image-models) library. We thank them for their wonderful code bases. 
 
 ## Citation
+If you find our work, this repository and pretrained Transformers with refined tokens useful. Please consider giving a star :star: and citation.
 ```bibtex
 @misc{naseer2021improving,
       title={On Improving Adversarial Transferability of Vision Transformers}, 

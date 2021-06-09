@@ -6,7 +6,7 @@
 [Fahad Khan](https://scholar.google.ch/citations?user=zvaeYnUAAAAJ&hl=en&oi=ao),
 [Fatih Porikli](https://scholar.google.com/citations?user=VpB8NZ8AAAAJ&hl=en)
 
-**[arxiv link](https://arxiv.org/pdf/2106.04169.pdf)** 
+**[arxiv link](https://arxiv.org/abs/2106.04169)** 
 
 ![demo](.github/demo.png)
 

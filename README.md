@@ -69,6 +69,15 @@ python test.py \
   --batch_size 128
 ```
 
+### Pretrained TRM modules
+
+|  Model 	| Avg Acc Inc 	| Pretrained 	|
+|:------:	|:-----------:	|:----------:	|
+| DeiT-T 	|    12.43    	|    [Link](https://github.com/Muzammal-Naseer/Improving-Adversarial-Transferability-of-Vision-Transformers/releases/download/v0/deit_tiny_trm.pth)    	|
+| DeiT-S 	|    15.21    	|    [Link](https://github.com/Muzammal-Naseer/Improving-Adversarial-Transferability-of-Vision-Transformers/releases/download/v0/deit_small_trm.pth)    	|
+| DeiT-B 	|    16.70    	|    [Link](https://github.com/Muzammal-Naseer/Improving-Adversarial-Transferability-of-Vision-Transformers/releases/download/v0/deit_base_trm.pth)    	|
+
+Average accuracy increase (Avg Acc Inc) refers to the improvement of discriminativity of each ViT block (measured by top-1 accuracy on ImageNet val set using each block output). The increase after adding TRM averaged across blocks is reported.    
 
 ## Training TRM
 <sup>([top](#contents))</sup>
@@ -100,7 +109,7 @@ python -m torch.distributed.launch \
 Code borrowed from [DeiT](https://github.com/facebookresearch/deit) repository and [TIMM](https://github.com/rwightman/pytorch-image-models) library. We thank them for their wonderful code bases. 
 
 ## Citation
-If you find our work, this repository and pretrained Transformers with refined tokens useful. Please consider giving a star :star: and citation.
+If you find our work, this repository, or pretrained transformers with refined tokens useful, please consider giving a star :star: and citation.
 ```bibtex
 @misc{naseer2021improving,
       title={On Improving Adversarial Transferability of Vision Transformers}, 

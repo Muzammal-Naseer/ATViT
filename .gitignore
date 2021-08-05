@@ -1,5 +1,5 @@
 # Project related
-/report
+/report*
 /checkpoints
 /wandb
 

@@ -33,10 +33,12 @@ def parse_args():
     parser.add_argument('--test_dir', default='data', help='ImageNet Validation Data')
     parser.add_argument('--src_model', type=str, default='deit_small_patch16_224', help='Source Model Name')
     parser.add_argument('--tar_model', type=str, default='T2t_vit_24', help='Target Model Name')
+    parser.add_argument('--src_pretrained', type=str, default=None, help='pretrained path for source model')
     parser.add_argument('--scale_size', type=int, default=256, help='')
     parser.add_argument('--img_size', type=int, default=224, help='')
     parser.add_argument('--batch_size', type=int, default=1, help='Batch Size')
     parser.add_argument('--eps', type=int, default=8, help='Perturbation Budget')
+    parser.add_argument('--iter', type=int, default=10, help='Attack iterations')
     parser.add_argument('--index', type=str, default='last', help='last or all')
     parser.add_argument('--attack_type', type=str, default='fgsm', help='fgsm, mifgsm, dim, pgd')
     parser.add_argument('--tar_ensemble', action="store_true", default=False)
@@ -121,6 +123,12 @@ def main():
 
     # load source and target models
     src_model, src_mean, src_std = get_model(args.src_model)
+    if args.src_pretrained is not None:
+        if args.src_pretrained.startswith("https://"):
+            src_checkpoint = torch.hub.load_state_dict_from_url(args.src_pretrained, map_location='cpu')
+        else:
+            src_checkpoint = torch.load(args.src_pretrained, map_location='cpu')
+        src_model.load_state_dict(src_checkpoint['model'])
     src_model = src_model.to(device)
     src_model.eval()
 
@@ -153,8 +161,8 @@ def main():
                 clean_out = clean_out[-1].detach()
             clean_acc += torch.sum(clean_out.argmax(dim=-1) == label).item()
 
-            adv = local_adv(src_model, criterion, img, label, eps, attack_type=args.attack_type, iters=10, std=src_std,
-                            mean=src_mean, index=args.index, apply_ti=args.apply_ti)
+            adv = local_adv(src_model, criterion, img, label, eps, attack_type=args.attack_type, iters=args.iter,
+                            std=src_std, mean=src_mean, index=args.index, apply_ti=args.apply_ti)
 
             with torch.no_grad():
                 if args.tar_ensemble:

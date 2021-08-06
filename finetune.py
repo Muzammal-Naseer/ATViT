@@ -52,6 +52,8 @@ def get_args():
     parser.add_argument('--lr', '--learning-rate', default=0.1, type=float,
                         metavar='LR', help='initial learning rate', dest='lr')
     parser.add_argument('--momentum', default=0.9, type=float, metavar='M', help='momentum')
+    parser.add_argument('--lr-decay-factor', default=0.1, type=float, help='lr decay factor')
+    parser.add_argument('--lr-decay-interval', default=10, type=int, help='lr decay interval')
     parser.add_argument('--wd', '--weight-decay', default=1e-4, type=float, metavar='W',
                         help='weight decay (default: 1e-4)', dest='weight_decay')
     # regularize
@@ -278,7 +280,6 @@ def main_worker(gpu, ngpus_per_node, args):
         if args.distributed:
             train_sampler.set_epoch(epoch)
         adjust_learning_rate(optimizer, epoch, args)
-
         tr_acc1, tr_acc5, tr_loss = train(train_loader, model, criterion, optimizer, epoch, args)
 
         # evaluate on validation set
@@ -290,6 +291,7 @@ def main_worker(gpu, ngpus_per_node, args):
                 "train/acc1": tr_acc1,
                 "train/acc5": tr_acc5,
                 "train/loss": tr_loss,
+                "train/lr": optimizer.param_groups[0]['lr'],
                 "test/acc1": acc1,
                 "test/acc5": acc5,
                 "test/loss": test_loss
@@ -469,7 +471,7 @@ class ProgressMeter(object):
 
 def adjust_learning_rate(optimizer, epoch, args):
     """Sets the learning rate to the initial LR decayed by 10 every 30 epochs"""
-    lr = args.lr  # * (0.1 ** (epoch // 90))
+    lr = args.lr * (args.lr_decay_factor ** (epoch // args.lr_decay_interval))
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
 

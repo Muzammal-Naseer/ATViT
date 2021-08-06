@@ -2,6 +2,7 @@
 /report*
 /checkpoints
 /wandb
+/data
 
 # Pycharm
 .idea

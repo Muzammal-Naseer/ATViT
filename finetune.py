@@ -18,6 +18,8 @@ import torch.utils.data.distributed
 import torchvision.datasets as datasets
 import torchvision.transforms as transforms
 import torchvision.utils as vutils
+
+import dataset
 import wandb
 from timm.models import create_model
 
@@ -31,6 +33,7 @@ ALL_MODELS = vars(deit_ensemble)
 def get_args():
     parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
     parser.add_argument('--data', default="", help='path to dataset')
+    parser.add_argument('--dataset', default="cifar10", help='dataset name')
     parser.add_argument('--model', default='tiny_patch16_224', type=str, help='Name of model to train')
     parser.add_argument('--num_classes', default=1000, help='number of classes')
     parser.add_argument('--seed', default=None, type=int, help='seed for initializing training. ')
@@ -239,17 +242,31 @@ def main_worker(gpu, ngpus_per_node, args):
     # Data loading code
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
-
-    train_dataset = datasets.CIFAR10(
-        root=args.data,
-        download=True,
-        train=True,
-        transform=transforms.Compose([
-            transforms.RandomResizedCrop(224),
-            transforms.RandomHorizontalFlip(),
-            transforms.ToTensor(),
-            normalize,
-        ]))
+    train_transform = transforms.Compose([
+                transforms.RandomResizedCrop(224),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                normalize,
+            ])
+    test_transform = transforms.Compose([
+                    transforms.Resize(256),
+                    transforms.CenterCrop(224),
+                    transforms.ToTensor(),
+                    normalize,
+                ])
+    if args.dataset == "cifar10":
+        train_dataset = datasets.CIFAR10(
+            root=args.data,
+            download=True,
+            train=True,
+            transform=train_transform)
+    elif args.dataset == "flowers102":
+        train_dataset = dataset.Flowers102Dataset(
+            image_root_path=args.data,
+            split="trainval",
+            transform=train_transform)
+    else:
+        raise NotImplementedError(f"Invalid dataset {args.dataset}")
 
     if args.distributed:
         train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
@@ -260,18 +277,24 @@ def main_worker(gpu, ngpus_per_node, args):
         train_dataset, batch_size=args.batch_size, shuffle=(train_sampler is None),
         num_workers=args.workers, pin_memory=True, sampler=train_sampler)
 
-    val_loader = torch.utils.data.DataLoader(
-        datasets.CIFAR10(
-            root=args.data,
-            train=False,
-            transform=transforms.Compose([
-                transforms.Resize(256),
-                transforms.CenterCrop(224),
-                transforms.ToTensor(),
-                normalize,
-            ])),
-        batch_size=args.batch_size, shuffle=False,
-        num_workers=args.workers, pin_memory=True)
+    if args.dataset == "cifar10":
+        val_loader = torch.utils.data.DataLoader(
+            datasets.CIFAR10(
+                root=args.data,
+                train=False,
+                transform=test_transform),
+            batch_size=args.batch_size, shuffle=False,
+            num_workers=args.workers, pin_memory=True)
+    elif args.dataset == "flowers102":
+        val_loader = torch.utils.data.DataLoader(
+            dataset.Flowers102Dataset(
+                image_root_path=args.data,
+                split="test",
+                transform=test_transform),
+            batch_size=args.batch_size, shuffle=False,
+            num_workers=args.workers, pin_memory=True)
+    else:
+        raise NotImplementedError(f"Invalid dataset {args.dataset}")
 
     if args.evaluate:
         raise NotImplementedError("eval only not implemented")

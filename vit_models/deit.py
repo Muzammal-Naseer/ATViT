@@ -111,8 +111,10 @@ class VanillaVisionTransformer(VisionTransformer):
 
         return [x[:, 0] for x in layer_wise_tokens], [x for x in layer_wise_tokens]
 
-    def forward(self, x, patches=False):
+    def forward(self, x, patches=False, only_last=False):
         list_out, patch_out = self.forward_features(x)
+        if only_last:
+            return self.head(x)
         x = [self.head(x) for x in list_out]
         if patches:
             return x, patch_out

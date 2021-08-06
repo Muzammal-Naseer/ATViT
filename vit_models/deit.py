@@ -114,7 +114,7 @@ class VanillaVisionTransformer(VisionTransformer):
     def forward(self, x, patches=False, only_last=False):
         list_out, patch_out = self.forward_features(x)
         if only_last:
-            return self.head(x)
+            return self.head(x[-1])
         x = [self.head(x) for x in list_out]
         if patches:
             return x, patch_out

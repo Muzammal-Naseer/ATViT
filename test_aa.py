@@ -111,6 +111,7 @@ def get_data_loader(args, verbose=True):
 def main():
     # setup run
     args = parse_args()
+    args.attack_type = "auto_attack"
     args.exp = f"{datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S')}_{random.randint(1, 100)}"
     os.makedirs(f"report/{args.exp}")
     json.dump(vars(args), open(f"report/{args.exp}/config.json", "w"), indent=4)

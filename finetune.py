@@ -419,7 +419,10 @@ def validate(val_loader, model, criterion, args, epoch=0):
             if torch.cuda.is_available():
                 target = target.cuda(args.gpu, non_blocking=True)
 
-            output = model(images, only_last=True)
+            if "resnet" in args.model:
+                output = model(images)
+            else:
+                output = model(images, only_last=True)
 
             loss = criterion(output, target)
 

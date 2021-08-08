@@ -31,7 +31,9 @@ ALL_MODELS = vars(deit_ensemble)
 def get_args():
     parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
     parser.add_argument('--data', default="", help='path to dataset')
+    parser.add_argument('--dataset', default="cifar10", help='dataset name')
     parser.add_argument('--model', default='tiny_patch16_224', type=str, help='Name of model to train')
+    parser.add_argument('--num_classes', default=1000, help='number of classes')
     parser.add_argument('--seed', default=None, type=int, help='seed for initializing training. ')
     parser.add_argument('--project', default='deit', type=str, help='project name')
     parser.add_argument('--exp', default='exp01', type=str, help='experiment name')
@@ -155,7 +157,7 @@ def main_worker(gpu, ngpus_per_node, args):
     model = create_model(
         args.model,
         pretrained=False,
-        num_classes=1000,
+        num_classes=args.num_classes,
         drop_rate=args.drop,
         drop_path_rate=args.drop_path,
         drop_block_rate=None,
@@ -167,7 +169,15 @@ def main_worker(gpu, ngpus_per_node, args):
                 args.pretrained, map_location='cpu', check_hash=True)
         else:
             checkpoint = torch.load(args.pretrained, map_location='cpu')
-        checkpoint_model = checkpoint['model']
+        if "model" in checkpoint:
+            checkpoint_model = checkpoint['model']
+        else:
+            from collections import OrderedDict
+            new_state_dict = OrderedDict()
+            for k, v in checkpoint["state_dict"].items():
+                name = k[7:]  # remove `module.' from state dict
+                new_state_dict[name] = v
+            checkpoint_model = new_state_dict
         msg = model.load_state_dict(checkpoint_model, strict=False)
         print(msg)
         print("NOTE: transformer head weights will be reported as missing - they are trained from scratch")
@@ -239,15 +249,32 @@ def main_worker(gpu, ngpus_per_node, args):
     valdir = os.path.join(args.data, 'val')
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
+    train_transform = transforms.Compose([
+                transforms.RandomResizedCrop(224),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                normalize,
+            ])
+    test_transform = transforms.Compose([
+                    transforms.Resize(256),
+                    transforms.CenterCrop(224),
+                    transforms.ToTensor(),
+                    normalize,
+                ])
 
-    train_dataset = datasets.ImageFolder(
-        traindir,
-        transforms.Compose([
-            transforms.RandomResizedCrop(224),
-            transforms.RandomHorizontalFlip(),
-            transforms.ToTensor(),
-            normalize,
-        ]))
+    if args.dataset == "cifar10":
+        train_dataset = datasets.CIFAR10(
+            root=args.data,
+            download=True,
+            train=True,
+            transform=train_transform)
+    elif args.dataset == "flowers102":
+        train_dataset = dataset.Flowers102Dataset(
+            image_root_path=args.data,
+            split="trainval",
+            transform=train_transform)
+    else:
+        train_dataset = datasets.ImageFolder(traindir,train_transform)
 
     if args.distributed:
         train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
@@ -258,15 +285,27 @@ def main_worker(gpu, ngpus_per_node, args):
         train_dataset, batch_size=args.batch_size, shuffle=(train_sampler is None),
         num_workers=args.workers, pin_memory=True, sampler=train_sampler)
 
-    val_loader = torch.utils.data.DataLoader(
-        datasets.ImageFolder(valdir, transforms.Compose([
-            transforms.Resize(256),
-            transforms.CenterCrop(224),
-            transforms.ToTensor(),
-            normalize,
-        ])),
-        batch_size=args.batch_size, shuffle=False,
-        num_workers=args.workers, pin_memory=True)
+    if args.dataset == "cifar10":
+        val_loader = torch.utils.data.DataLoader(
+            datasets.CIFAR10(
+                root=args.data,
+                train=False,
+                transform=test_transform),
+            batch_size=args.batch_size, shuffle=False,
+            num_workers=args.workers, pin_memory=True)
+    elif args.dataset == "flowers102":
+        val_loader = torch.utils.data.DataLoader(
+            dataset.Flowers102Dataset(
+                image_root_path=args.data,
+                split="test",
+                transform=test_transform),
+            batch_size=args.batch_size, shuffle=False,
+            num_workers=args.workers, pin_memory=True)
+    else:
+        val_loader = torch.utils.data.DataLoader(
+            datasets.ImageFolder(valdir, test_transform),
+            batch_size=args.batch_size, shuffle=False,
+            num_workers=args.workers, pin_memory=True)
 
     if args.evaluate:
         eval_dict = {}

@@ -371,7 +371,10 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
             vutils.save_image(vutils.make_grid(images[:16], normalize=False, scale_each=True),
                               f"example_before.jpg")
 
-        output = model(images, only_last=True)
+        if "resnet" in args.model:
+            output = model(images)
+        else:
+            output = model(images, only_last=True)
         loss = criterion(output, target)
 
         # measure accuracy and record loss

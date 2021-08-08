@@ -32,6 +32,7 @@ targeted_class_dict = {
 def parse_args():
     parser = argparse.ArgumentParser(description='Transformers')
     parser.add_argument('--test_dir', default='data', help='ImageNet Validation Data')
+    parser.add_argument('--dataset', default="imagenet_5k", help='dataset name')
     parser.add_argument('--src_model', type=str, default='deit_small_patch16_224', help='Source Model Name')
     parser.add_argument('--tar_model', type=str, default='T2t_vit_24', help='Target Model Name')
     parser.add_argument('--src_pretrained', type=str, default=None, help='pretrained path for source model')
@@ -95,7 +96,10 @@ def get_data_loader(args, verbose=True):
     ])
 
     test_dir = args.test_dir
-    test_set = AdvImageNet(root=test_dir, transform=data_transform)
+    if args.dataset == "imagenet_1k":
+        test_set = AdvImageNet(image_list="data/image_list_1k.json", root=test_dir, transform=data_transform)
+    else:
+        test_set = AdvImageNet(root=test_dir, transform=data_transform)
     test_size = len(test_set)
     if verbose:
         print('Test data size:', test_size)

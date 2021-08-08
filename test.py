@@ -3,8 +3,10 @@ import datetime
 import json
 import logging
 import os
+import random
 
 import torch
+import torchvision.datasets as datasets
 from timm.models import create_model
 from torch.utils.data import DataLoader
 from torchvision import transforms, models, utils as vutils
@@ -12,7 +14,7 @@ from tqdm import tqdm
 
 import vit_models
 from attack import normalize, local_adv
-from dataset import AdvImageNet
+from dataset import AdvImageNet, Flowers102Dataset
 
 targeted_class_dict = {
     24: "Great Grey Owl",
@@ -31,9 +33,12 @@ targeted_class_dict = {
 def parse_args():
     parser = argparse.ArgumentParser(description='Transformers')
     parser.add_argument('--test_dir', default='data', help='ImageNet Validation Data')
+    parser.add_argument('--dataset', default="imagenet", help='dataset name')
+    parser.add_argument('--num_classes', default=1000, help='number of classes')
     parser.add_argument('--src_model', type=str, default='deit_small_patch16_224', help='Source Model Name')
     parser.add_argument('--tar_model', type=str, default='T2t_vit_24', help='Target Model Name')
     parser.add_argument('--src_pretrained', type=str, default=None, help='pretrained path for source model')
+    parser.add_argument('--tar_pretrained', type=str, default=None, help='pretrained path for source model')
     parser.add_argument('--scale_size', type=int, default=256, help='')
     parser.add_argument('--img_size', type=int, default=224, help='')
     parser.add_argument('--batch_size', type=int, default=1, help='Batch Size')
@@ -48,7 +53,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def get_model(model_name):
+def get_model(model_name, num_classes, pretrained=True):
     model_names = sorted(name for name in models.__dict__
                          if name.islower() and not name.startswith("__")
                          and callable(models.__dict__[name]))
@@ -56,27 +61,27 @@ def get_model(model_name):
 
     # get the source model
     if model_name in model_names:
-        model = models.__dict__[model_name](pretrained=True)
+        model = models.__dict__[model_name](pretrained=pretrained, num_classes=num_classes)
         mean = (0.485, 0.456, 0.406)
         std = (0.229, 0.224, 0.225)
     elif 'deit' in model_name:
-        model = create_model(model_name, pretrained=True)
+        model = create_model(model_name, pretrained=pretrained, num_classes=num_classes)
         mean = (0.485, 0.456, 0.406)
         std = (0.229, 0.224, 0.225)
     elif 'hierarchical' in model_name or "ensemble" in model_name:
-        model = create_model(model_name, pretrained=True)
+        model = create_model(model_name, pretrained=pretrained, num_classes=num_classes)
         mean = (0.485, 0.456, 0.406)
         std = (0.229, 0.224, 0.225)
     elif 'vit' in model_name:
-        model = create_model(model_name, pretrained=True)
+        model = create_model(model_name, pretrained=pretrained, num_classes=num_classes)
         mean = (0.5, 0.5, 0.5)
         std = (0.5, 0.5, 0.5)
     elif 'T2t' in model_name:
-        model = create_model(model_name, pretrained=True)
+        model = create_model(model_name, pretrained=pretrained, num_classes=num_classes)
         mean = (0.485, 0.456, 0.406)
         std = (0.229, 0.224, 0.225)
     elif 'tnt' in model_name:
-        model = create_model(model_name, pretrained=True)
+        model = create_model(model_name, pretrained=pretrained, num_classes=num_classes)
         mean = (0.5, 0.5, 0.5)
         std = (0.5, 0.5, 0.5)
     else:
@@ -94,7 +99,12 @@ def get_data_loader(args, verbose=True):
     ])
 
     test_dir = args.test_dir
-    test_set = AdvImageNet(root=test_dir, transform=data_transform)
+    if args.dataset == "cifar10":
+        test_set = datasets.CIFAR10(root=test_dir, download=True, train=False, transform=data_transform)
+    elif args.dataset == "flowers102":
+        test_set = Flowers102Dataset(image_root_path=test_dir, split="test", transform=data_transform)
+    else:
+        test_set = AdvImageNet(root=test_dir, transform=data_transform)
     test_size = len(test_set)
     if verbose:
         print('Test data size:', test_size)
@@ -106,7 +116,7 @@ def get_data_loader(args, verbose=True):
 def main():
     # setup run
     args = parse_args()
-    args.exp = f"{datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S')}"
+    args.exp = f"{datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S')}_{random.randint(1, 100)}"
     os.makedirs(f"report/{args.exp}")
     json.dump(vars(args), open(f"report/{args.exp}/config.json", "w"), indent=4)
 
@@ -122,17 +132,48 @@ def main():
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
     # load source and target models
-    src_model, src_mean, src_std = get_model(args.src_model)
+    src_model, src_mean, src_std = get_model(args.src_model, num_classes=int(args.num_classes),
+                                             pretrained=False if args.src_pretrained else True)
+
+    # handle loading pretrained
     if args.src_pretrained is not None:
         if args.src_pretrained.startswith("https://"):
             src_checkpoint = torch.hub.load_state_dict_from_url(args.src_pretrained, map_location='cpu')
         else:
             src_checkpoint = torch.load(args.src_pretrained, map_location='cpu')
+        if "model" in src_checkpoint:
+            pass
+        else:
+            from collections import OrderedDict
+            new_state_dict = OrderedDict()
+            for k, v in src_checkpoint["state_dict"].items():
+                name = k[7:]  # remove `module.' from state dict
+                new_state_dict[name] = v
+            src_checkpoint['model'] = new_state_dict
         src_model.load_state_dict(src_checkpoint['model'])
+
     src_model = src_model.to(device)
     src_model.eval()
 
-    tar_model, tar_mean, tar_std = get_model(args.tar_model)
+    tar_model, tar_mean, tar_std = get_model(args.tar_model, num_classes=int(args.num_classes),
+                                             pretrained=False if args.tar_pretrained else True)
+    # handle loading pretrained
+    if args.tar_pretrained is not None:
+        if args.tar_pretrained.startswith("https://"):
+            tar_checkpoint = torch.hub.load_state_dict_from_url(args.tar_pretrained, map_location='cpu')
+        else:
+            tar_checkpoint = torch.load(args.tar_pretrained, map_location='cpu')
+        if "model" in tar_checkpoint:
+            pass
+        else:
+            from collections import OrderedDict
+            new_state_dict = OrderedDict()
+            for k, v in tar_checkpoint["state_dict"].items():
+                name = k[7:]  # remove `module.' from state dict
+                new_state_dict[name] = v
+            tar_checkpoint['model'] = new_state_dict
+        tar_model.load_state_dict(tar_checkpoint['model'])
+
     tar_model = tar_model.to(device)
     tar_model.eval()
 

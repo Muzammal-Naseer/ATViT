@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 import torch.nn.functional as F
 
@@ -28,7 +29,40 @@ def input_diversity(img):
     return padded
 
 
-def local_adv(model, criterion, img, label, eps, attack_type, iters, mean, std, index, apply_ti=False):
+def project_kern(kern_size):
+    kern = np.ones((kern_size, kern_size), dtype=np.float32) / (kern_size ** 2 - 1)
+    kern[kern_size // 2, kern_size // 2] = 0.0
+    kern = kern.astype(np.float32)
+    stack_kern = np.stack([kern, kern, kern])
+    stack_kern = np.expand_dims(stack_kern, 1)
+    stack_kern = torch.tensor(stack_kern).cuda()
+    return stack_kern, kern_size // 2
+
+
+def project_noise(x, stack_kern, padding_size):
+    # x = tf.pad(x, [[0,0],[kern_size,kern_size],[kern_size,kern_size],[0,0]], "CONSTANT")
+    x = F.conv2d(x, stack_kern, padding=(padding_size, padding_size), groups=3)
+    return x
+
+
+def clip_by_tensor(t, t_min, t_max):
+    """
+    clip_by_tensor
+    :param t: tensor
+    :param t_min: min
+    :param t_max: max
+    :return: cliped tensor
+    """
+    result = (t >= t_min).float() * t + (t < t_min).float() * t_min
+    result = (result <= t_max).float() * result + (result > t_max).float() * t_max
+    return result
+
+
+stack_kern, padding_size = project_kern(3)
+
+
+def local_adv(model, criterion, img, label, eps, attack_type, iters, mean, std, index, apply_ti=False, amp=10):
+
     adv = img.detach()
 
     if attack_type == 'rfgsm':
@@ -47,6 +81,14 @@ def local_adv(model, criterion, img, label, eps, attack_type, iters, mean, std, 
         step = 2 / 255
     else:
         step = eps / iterations
+
+    if attack_type == 'pifgsm':
+        # alpha = step = eps / iterations
+        alpha_beta = step * amp
+        gamma = alpha_beta
+        amplification = 0.0
+        # images_min = clip_by_tensor(img - eps, 0.0, 1.0)
+        # images_max = clip_by_tensor(img + eps, 0.0, 1.0)
 
     adv_noise = 0
     for j in range(iterations):
@@ -78,14 +120,28 @@ def local_adv(model, criterion, img, label, eps, attack_type, iters, mean, std, 
             adv_noise = adv.grad
 
         # Optimization step
-        adv.data = adv.data + step * adv_noise.sign()
+        if attack_type == 'pifgsm':
+            amplification += alpha_beta * adv_noise.sign()
+            cut_noise = torch.clamp(abs(amplification) - eps, 0, 10000.0) * torch.sign(amplification)
+            projection = gamma * torch.sign(project_noise(cut_noise, stack_kern, padding_size))
+            amplification += projection
 
-        # Projection
-        if attack_type == 'pgd':
-            adv.data = torch.where(adv.data > img.data + eps, img.data + eps, adv.data)
-            adv.data = torch.where(adv.data < img.data - eps, img.data - eps, adv.data)
-        adv.data.clamp_(0.0, 1.0)
+            adv.data = adv.data + alpha_beta * adv_noise.sign() + projection
+            # adv = clip_by_tensor(adv, images_min, images_max)
+            adv.data.clamp_(0.0, 1.0)
+
+        else:
+            adv.data = adv.data + step * adv_noise.sign()
+
+            # Projection
+            if attack_type == 'pgd':
+                adv.data = torch.where(adv.data > img.data + eps, img.data + eps, adv.data)
+                adv.data = torch.where(adv.data < img.data - eps, img.data - eps, adv.data)
+
+            adv.data.clamp_(0.0, 1.0)
+
         adv.grad.data.zero_()
+
     return adv.detach()
 
 

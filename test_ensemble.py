@@ -34,7 +34,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Transformers')
     parser.add_argument('--test_dir', default='data', help='ImageNet Validation Data')
     parser.add_argument('--dataset', default="imagenet_1k", help='dataset name')
-    parser.add_argument('--src_model', type=str, default='deit_small_patch16_224', help='Source Model Name')
+    parser.add_argument('--src_model', type=str, default='ensemble', help='Source Model Name')
     parser.add_argument('--tar_model', type=str, nargs="+", default=['tnt_s_patch16_224', ], help='Target Model Name')
     parser.add_argument('--src_pretrained', type=str, default=None, help='pretrained path for source model')
     parser.add_argument('--scale_size', type=int, default=256, help='')
@@ -121,9 +121,14 @@ def main():
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
     # load source and target models
-    src_tiny, src_mean, src_std = get_model("deit_tiny_patch16_224")
-    src_small, _, _ = get_model("deit_small_patch16_224")
-    src_base, _, _ = get_model("deit_base_patch16_224")
+    if args.src_model == "ensemble_heir":
+        src_tiny, src_mean, src_std = get_model("tiny_patch16_224_hierarchical")
+        src_small, _, _ = get_model("small_patch16_224_hierarchical")
+        src_base, _, _ = get_model("base_patch16_224_hierarchical")
+    else:
+        src_tiny, src_mean, src_std = get_model("deit_tiny_patch16_224")
+        src_small, _, _ = get_model("deit_small_patch16_224")
+        src_base, _, _ = get_model("deit_base_patch16_224")
 
     # if args.src_pretrained is not None:
     #     if args.src_pretrained.startswith("https://"):

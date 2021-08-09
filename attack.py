@@ -127,7 +127,8 @@ def local_adv(model, criterion, img, label, eps, attack_type, iters, mean, std, 
             amplification += projection
 
             adv.data = adv.data + alpha_beta * adv_noise.sign() + projection
-            # adv = clip_by_tensor(adv, images_min, images_max)
+            adv.data = torch.where(adv.data > img.data + eps, img.data + eps, adv.data)
+            adv.data = torch.where(adv.data < img.data - eps, img.data - eps, adv.data)
             adv.data.clamp_(0.0, 1.0)
 
         else:

@@ -15,6 +15,17 @@
 *Vision transformers (ViTs) process input images as sequences of patches via self-attention;  a radically different architecture than convolutional neural networks(CNNs).  This makes it interesting to study the adversarial feature space of ViT models and their transferability. In particular, we observe that adversarial patterns found via conventional adversarial attacks show very low black-box transferability even for large ViT models. However, we show that this phenomenon is only due to the sub-optimal attack procedures that do not leverage the true representation potential of ViTs. A deep ViT is composed of multiple blocks, with a consistent architecture comprising of self-attention and feed-forward layers, where each block is capable of independently producing a class token. Formulating an attack using only the last class token (conventional approach) does not directly leverage the discriminative information stored in the earlier tokens, leading to poor adversarial transferability of ViTs. Using the compositional nature of ViT models, we enhance transferability  of  existing  attacks  by  introducing  two  novel  strategies  specific to the architecture of ViT models.(i) Self-Ensemble:We propose a method to find multiple discriminative pathways by dissecting a single ViT model into an ensemble of networks. This allows explicitly utilizing class-specific information at each ViT block.(ii) Token Refinement:We then propose to refine the tokens to further enhance the discriminative capacity at each block of ViT. Our token refinement systematically combines the class tokens with structural information preserved within the patch tokens.  An adversarial attack when applied to such refined tokens within the ensemble of classifiers found in a single vision transformer has significantly higher transferability and thereby brings out the true generalization potential of the ViT’s adversarial space.* 
 
 
+## Citation
+If you find our work, this repository, or pretrained transformers with refined tokens useful, please consider giving a star :star: and citation.
+```bibtex
+@InProceedings{naseer2021improving,
+      title={On Improving Adversarial Transferability of Vision Transformers}, 
+      author={Muzammal Naseer and Kanchana Ranasinghe and Salman Khan and Fahad Shahbaz Khan and Fatih Porikli},
+      booktitle={Adv. Neural Inform. Process. Syst.},
+      year={2021}
+}
+```
+
 ## Contents
 1) [Quickstart](#quickstart)
 2) [Self-Ensemble](#self-ensemble-strategy)
@@ -107,16 +118,3 @@ python -m torch.distributed.launch \
 ## References
 <sup>([top](#contents))</sup>
 Code borrowed from [DeiT](https://github.com/facebookresearch/deit) repository and [TIMM](https://github.com/rwightman/pytorch-image-models) library. We thank them for their wonderful code bases. 
-
-## Citation
-If you find our work, this repository, or pretrained transformers with refined tokens useful, please consider giving a star :star: and citation.
-```bibtex
-@misc{naseer2021improving,
-      title={On Improving Adversarial Transferability of Vision Transformers}, 
-      author={Muzammal Naseer and Kanchana Ranasinghe and Salman Khan and Fahad Shahbaz Khan and Fatih Porikli},
-      year={2021},
-      eprint={2106.04169},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV}
-}
-```

@@ -16,7 +16,7 @@
 
 
 ## Citation
-If you find our work, this repository, or pretrained transformers with refined tokens useful, please consider giving a star :star: and citation.
+If you find our work, this repository, or pretrained transformers with refined tokens useful, please consider giving a star :star:  and citation.
 ```bibtex
 @InProceedings{naseer2021improving,
       title={On Improving Adversarial Transferability of Vision Transformers}, 

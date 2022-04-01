@@ -75,7 +75,7 @@ python test.py \
 
 For other model families, the pretrained models will have to be downloaded and the paths updated in the relevant files under `vit_models`. 
 
-## Token Refinement Module
+## Token Refinement Module (TRM)
 <sup>([top](#contents))</sup>
 For self-ensemble attack with TRM, run the following. The same options are available for attack types and `DATA_DIR` must be set to point to the data directory. 
 ```bash

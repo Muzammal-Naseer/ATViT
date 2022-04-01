@@ -36,11 +36,12 @@ If you find our work, this repository, or pretrained transformers with refined t
 
 ## Contributions
 1. **Self-ensemble:** *"Your Vision Transformer is secretly an ensemble of classifiers"* We propose effective strategies to convert an off-the-shelf Vision Transformer into an ensemble of models (self-ensemble) by mapping intermediate class tokens to the final classifier.
-2. ** Token Refinement: **We introduce a simple training approach to refine class and patch tokens for increase in discriminative abilities across these sub-models within a single Vision Transformer.
+![demo](.github/demo.png)
+2. **Token Refinement:** We introduce a simple training approach to refine class and patch tokens for increase in discriminative abilities across these sub-models within a single Vision Transformer.
+![trm](.github/trm.png)
 3. Our approach paves the way to enhance the representation capacity of Vision Transformer's internal representations.
 4. Students and Researchers can explore the benefits of our approach in transfer learning or training a robust ViT. Practitioners can use our method to compress large ViTs with minimal drop in recognition accuracy.
-![demo](.github/demo.png)
-![trm](.github/trm.png)
+
 
 ## Requirements
 ```bash

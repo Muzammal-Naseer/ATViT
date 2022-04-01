@@ -124,7 +124,7 @@ python -m torch.distributed.launch \
   --output_dir "checkpoints/$EXP_NAME"
 ```  
 
-## References
+## Acknowledgements
 <sup>([top](#contents))</sup>
 Code is based on [DeiT](https://github.com/facebookresearch/deit) repository and [TIMM](https://github.com/rwightman/pytorch-image-models) library. We thank the authors for releaseing their codes. 
 

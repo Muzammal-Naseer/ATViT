@@ -89,7 +89,7 @@ python test.py \
   --batch_size 128
 ```
 
-### Pretrained TRM modules
+### Pretrained Models with TRM modules
 
 |  Model 	| Avg Acc Inc 	| Pretrained 	|
 |:------:	|:-----------:	|:----------:	|

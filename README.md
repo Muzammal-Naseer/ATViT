@@ -17,13 +17,13 @@
 ## Citation
 If you find our work, this repository, or pretrained transformers with refined tokens useful, please consider giving a star :star: and citation.
 ```bibtex
-@misc{naseer2021improving,
-      title={On Improving Adversarial Transferability of Vision Transformers}, 
-      author={Muzammal Naseer and Kanchana Ranasinghe and Salman Khan and Fahad Shahbaz Khan and Fatih Porikli},
-      year={2021},
-      eprint={2106.04169},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV}
+@inproceedings{
+naseer2022on,
+title={On Improving Adversarial Transferability of Vision Transformers },
+author={Muzammal Naseer and Kanchana Ranasinghe and Salman Khan and Fahad Khan and Fatih Porikli},
+booktitle={International Conference on Learning Representations},
+year={2022},
+url={https://openreview.net/forum?id=D6nH3719vZy}
 }
 ```
 

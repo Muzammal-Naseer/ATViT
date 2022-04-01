@@ -9,7 +9,6 @@
 [Paper](https://openreview.net/forum?id=D6nH3719vZy) ([arxiv](https://arxiv.org/abs/2106.04169)), [Reviews & Response](https://openreview.net/forum?id=D6nH3719vZy)
 
 ![demo](.github/demo.png)
-![trm](.github/trm.png)
 
 > **Abstract:** 
 *Vision transformers (ViTs) process input images as sequences of patches via self-attention;  a radically different architecture than convolutional neural networks(CNNs).  This makes it interesting to study the adversarial feature space of ViT models and their transferability. In particular, we observe that adversarial patterns found via conventional adversarial attacks show very low black-box transferability even for large ViT models. However, we show that this phenomenon is only due to the sub-optimal attack procedures that do not leverage the true representation potential of ViTs. A deep ViT is composed of multiple blocks, with a consistent architecture comprising of self-attention and feed-forward layers, where each block is capable of independently producing a class token. Formulating an attack using only the last class token (conventional approach) does not directly leverage the discriminative information stored in the earlier tokens, leading to poor adversarial transferability of ViTs. Using the compositional nature of ViT models, we enhance transferability  of  existing  attacks  by  introducing  two  novel  strategies  specific to the architecture of ViT models.(i) Self-Ensemble:We propose a method to find multiple discriminative pathways by dissecting a single ViT model into an ensemble of networks. This allows explicitly utilizing class-specific information at each ViT block.(ii) Token Refinement:We then propose to refine the tokens to further enhance the discriminative capacity at each block of ViT. Our token refinement systematically combines the class tokens with structural information preserved within the patch tokens.  An adversarial attack when applied to such refined tokens within the ensemble of classifiers found in a single vision transformer has significantly higher transferability and thereby brings out the true generalization potential of the ViT’s adversarial space.* 
@@ -93,6 +92,7 @@ python test.py \
 Average accuracy increase (Avg Acc Inc) refers to the improvement of discriminativity of each ViT block (measured by top-1 accuracy on ImageNet val set using each block output). The increase after adding TRM averaged across blocks is reported.    
 
 ## Training TRM
+![trm](.github/trm.png)
 <sup>([top](#contents))</sup>
 For training the TRM module, use the following:
 ```bash

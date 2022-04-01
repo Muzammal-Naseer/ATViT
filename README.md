@@ -126,6 +126,6 @@ python -m torch.distributed.launch \
 
 ## Acknowledgements
 <sup>([top](#contents))</sup>
-Code is based on [DeiT](https://github.com/facebookresearch/deit) repository and [TIMM](https://github.com/rwightman/pytorch-image-models) library. We thank the authors for releaseing their codes. 
+Code is based on [DeiT](https://github.com/facebookresearch/deit) repository and [TIMM](https://github.com/rwightman/pytorch-image-models) library. We thank the authors for releasing their codes. 
 
 

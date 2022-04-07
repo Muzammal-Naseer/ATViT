@@ -6,7 +6,7 @@
 [Fahad Khan](https://scholar.google.ch/citations?user=zvaeYnUAAAAJ&hl=en&oi=ao),
 [Fatih Porikli](https://scholar.google.com/citations?user=VpB8NZ8AAAAJ&hl=en)
 
-[Paper](https://openreview.net/forum?id=D6nH3719vZy) ([arxiv](https://arxiv.org/abs/2106.04169)), [Reviews & Response](https://openreview.net/forum?id=D6nH3719vZy)
+[Paper](https://openreview.net/forum?id=D6nH3719vZy) ([arxiv](https://arxiv.org/abs/2106.04169)), [Reviews & Response](https://openreview.net/forum?id=D6nH3719vZy), [Video Presentation](https://recorder-v3.slideslive.com/#/share?share=62589&s=569ede9b-273e-45e8-a12a-be057e75aea1), [Poster](https://drive.google.com/file/d/1EC2aJEeQP2Wu0jemD2fJhOamaC1EoaFF/view)
 
 
 > **Abstract:** 

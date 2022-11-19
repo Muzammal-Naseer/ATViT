@@ -1,4 +1,4 @@
-# Improving Adversarial Transferability of Vision Transformers (ICLR'22--Spotlight)
+# On Improving Adversarial Transferability of Vision Transformers (ICLR'22--Spotlight)
 
 [Muzammal Naseer](https://scholar.google.ch/citations?user=tM9xKA8AAAAJ&hl=en),
 [Kanchana Ranasinghe](https://scholar.google.com/citations?user=K2WBZTwAAAAJ),
